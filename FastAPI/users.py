@@ -55,6 +55,17 @@ async def user(user: User):
     if not user_found:
         return {"error: user wasn't found"}
     
+@app.delete("/user/{id}")
+async def user(id: int):
+    user_found = False
+
+    for index, item in enumerate(users_list):
+        if item.id == id:
+            del users_list[index]
+            user_found = True
+
+    if not user_found:
+        return {"error: user wasn't removed"}    
 
 """
 GET specific user by PATH or QUERY_PARAM 
