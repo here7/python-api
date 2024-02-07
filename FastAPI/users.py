@@ -36,6 +36,36 @@ async def user(id: int):
 async def user(id: int):
     return search_user(id)
 
+@app.post("/user/")
+async def user(user: User):
+    if type(search_user(user.id)) == User:
+        return {"error: User already exists"}
+    else:
+        users_list.append(user)
+
+@app.put("/user/")
+async def user(user: User):
+    user_found = False
+
+    for index, item in enumerate(users_list):
+        if item.id == user.id:
+            users_list[index] = user
+            user_found = True
+
+    if not user_found:
+        return {"error: user wasn't found"}
+    
+@app.delete("/user/{id}")
+async def user(id: int):
+    user_found = False
+
+    for index, item in enumerate(users_list):
+        if item.id == id:
+            del users_list[index]
+            user_found = True
+
+    if not user_found:
+        return {"error: user wasn't removed"}    
 
 """
 GET specific user by PATH or QUERY_PARAM 
