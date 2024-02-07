@@ -1,8 +1,8 @@
-from fastapi import FastAPI, HTTPException
-
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI()
+# app = FastAPI()
+router = APIRouter()
 
 # Class User --> BaseModel allows to creating an Entity. If not, the app would say that User() class needs parameters
 class User(BaseModel):
@@ -20,24 +20,24 @@ users_list = [User(id=1, name="Dani", lastname="Heredia", age=34, gender="male")
 
 
 # GET all users using BaseModel
-@app.get("/users", status_code=200)
+@router.get("/users", status_code=200)
 async def users():
     return users_list
 
 
 # Path
-@app.get("/user/{id}", status_code=200)
+@router.get("/user/{id}", status_code=200)
 async def user(id: int):
     return search_user(id)
     
 
 # Query-Param
-@app.get("/user/", status_code=200)
+@router.get("/user/", status_code=200)
 async def user(id: int):
     return search_user(id)
 
 
-@app.post("/user/", status_code=201)
+@router.post("/user/", status_code=201)
 async def user(user: User):
     if type(search_user(user.id)) == User:
         raise HTTPException(status_code=204, detail="error: User already exists")
@@ -46,7 +46,7 @@ async def user(user: User):
         return user
 
 
-@app.put("/user/", status_code=200)
+@router.put("/user/", status_code=200)
 async def user(user: User):
     user_found = False
 
@@ -59,7 +59,7 @@ async def user(user: User):
         raise HTTPException(status_code=404, detail="error: user wasn't found")
     
 
-@app.delete("/user/{id}", status_code=200)
+@router.delete("/user/{id}", status_code=200)
 async def user(id: int):
     user_found = False
 
