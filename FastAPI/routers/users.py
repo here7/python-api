@@ -1,8 +1,8 @@
-from fastapi import FastAPI
-
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI()
+# app = FastAPI()
+router = APIRouter()
 
 # Class User --> BaseModel allows to creating an Entity. If not, the app would say that User() class needs parameters
 class User(BaseModel):
@@ -20,30 +20,33 @@ users_list = [User(id=1, name="Dani", lastname="Heredia", age=34, gender="male")
 
 
 # GET all users using BaseModel
-@app.get("/users")
+@router.get("/users", status_code=200)
 async def users():
     return users_list
 
 
 # Path
-@app.get("/user/{id}")
+@router.get("/user/{id}", status_code=200)
 async def user(id: int):
     return search_user(id)
     
 
 # Query-Param
-@app.get("/user/")
+@router.get("/user/", status_code=200)
 async def user(id: int):
     return search_user(id)
 
-@app.post("/user/")
+
+@router.post("/user/", status_code=201)
 async def user(user: User):
     if type(search_user(user.id)) == User:
-        return {"error: User already exists"}
+        raise HTTPException(status_code=204, detail="error: User already exists")
     else:
         users_list.append(user)
+        return user
 
-@app.put("/user/")
+
+@router.put("/user/", status_code=200)
 async def user(user: User):
     user_found = False
 
@@ -53,9 +56,10 @@ async def user(user: User):
             user_found = True
 
     if not user_found:
-        return {"error: user wasn't found"}
+        raise HTTPException(status_code=404, detail="error: user wasn't found")
     
-@app.delete("/user/{id}")
+
+@router.delete("/user/{id}", status_code=200)
 async def user(id: int):
     user_found = False
 
@@ -65,7 +69,8 @@ async def user(id: int):
             user_found = True
 
     if not user_found:
-        return {"error: user wasn't removed"}    
+        raise HTTPException(status_code=404, detail="error: user wasn't removed")
+
 
 """
 GET specific user by PATH or QUERY_PARAM 
@@ -77,4 +82,4 @@ def search_user(id: int):
     try:
         return list(user)[0]
     except:
-        return {"error: User doesn't exist"}
+        raise HTTPException(status_code=404, detail="error: User doesn't exist")
