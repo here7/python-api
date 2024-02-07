@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from pydantic import BaseModel
 
@@ -20,30 +20,33 @@ users_list = [User(id=1, name="Dani", lastname="Heredia", age=34, gender="male")
 
 
 # GET all users using BaseModel
-@app.get("/users")
+@app.get("/users", status_code=200)
 async def users():
     return users_list
 
 
 # Path
-@app.get("/user/{id}")
+@app.get("/user/{id}", status_code=200)
 async def user(id: int):
     return search_user(id)
     
 
 # Query-Param
-@app.get("/user/")
+@app.get("/user/", status_code=200)
 async def user(id: int):
     return search_user(id)
 
-@app.post("/user/")
+
+@app.post("/user/", status_code=201)
 async def user(user: User):
     if type(search_user(user.id)) == User:
-        return {"error: User already exists"}
+        raise HTTPException(status_code=204, detail="error: User already exists")
     else:
         users_list.append(user)
+        return user
 
-@app.put("/user/")
+
+@app.put("/user/", status_code=200)
 async def user(user: User):
     user_found = False
 
@@ -53,9 +56,10 @@ async def user(user: User):
             user_found = True
 
     if not user_found:
-        return {"error: user wasn't found"}
+        raise HTTPException(status_code=404, detail="error: user wasn't found")
     
-@app.delete("/user/{id}")
+
+@app.delete("/user/{id}", status_code=200)
 async def user(id: int):
     user_found = False
 
@@ -65,7 +69,8 @@ async def user(id: int):
             user_found = True
 
     if not user_found:
-        return {"error: user wasn't removed"}    
+        raise HTTPException(status_code=404, detail="error: user wasn't removed")
+
 
 """
 GET specific user by PATH or QUERY_PARAM 
@@ -77,4 +82,4 @@ def search_user(id: int):
     try:
         return list(user)[0]
     except:
-        return {"error: User doesn't exist"}
+        raise HTTPException(status_code=404, detail="error: User doesn't exist")
