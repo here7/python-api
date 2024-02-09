@@ -2,7 +2,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 #app = FastAPI()
-router = APIRouter()
+router = APIRouter(prefix="/user",
+                   tags=["users"],
+                   responses={404: {"message": "Not Found"}})
 
 # Class User --> BaseModel allows to creating an Entity. If not, the app would say that User() class needs parameters
 class User(BaseModel):
@@ -20,24 +22,24 @@ users_list = [User(id=1, name="Dani", lastname="Heredia", age=34, gender="male")
 
 
 # GET all users using BaseModel
-@router.get("/users", status_code=200)
+@router.get("/all", status_code=200)
 async def users():
     return users_list
 
 
 # Path
-@router.get("/user/{id}", status_code=200)
+@router.get("/{id}", status_code=200)
 async def user(id: int):
     return search_user(id)
     
 
 # Query-Param
-@router.get("/user/", status_code=200)
+@router.get("/", status_code=200)
 async def user(id: int):
     return search_user(id)
 
 
-@router.post("/user/", status_code=201)
+@router.post("/", status_code=201)
 async def user(user: User):
     if type(search_user(user.id)) == User:
         raise HTTPException(status_code=204, detail="error: User already exists")
@@ -46,7 +48,7 @@ async def user(user: User):
         return user
 
 
-@router.put("/user/", status_code=200)
+@router.put("/", status_code=200)
 async def user(user: User):
     user_found = False
 
@@ -59,7 +61,7 @@ async def user(user: User):
         raise HTTPException(status_code=404, detail="error: user wasn't found")
     
 
-@router.delete("/user/{id}", status_code=200)
+@router.delete("/{id}", status_code=200)
 async def user(id: int):
     user_found = False
 
