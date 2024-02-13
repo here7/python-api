@@ -24,7 +24,7 @@ users_db = {
         "disabled": False,
         "password": "123456" 
     },
-        "dani_2": {
+    "dani_2": {
         "username": "dani_2",
         "full_name": "Dani Heredia 2",
         "email": "dani2@gmail.com",
@@ -34,9 +34,17 @@ users_db = {
 }
 
 
+# ** -> indicates that the BaseModel could have multiple params
+# data with no passwd
 def search_user(username: str):
     if username in users_db:
-        return UserDB(users_db[username])
+        return User(**users_db[username])
+
+# with passwd
+def search_user_db(username: str):
+    if username in users_db:
+        return UserDB(**users_db[username])
+
 
 
  # criterio de dependecia para /me (por eso es async tb)
@@ -49,6 +57,14 @@ async def current_user(token: str = Depends(oauth2)):
             detail="Not valid Credentials",
             headers={"WWW-Authenticate": "Bearer"}
         )
+    
+    if user.disabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="User disabled"
+        ) 
+    
+    return user
 
 # authentication implementation
 @app.post("/login")
@@ -59,7 +75,7 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail="error: user wasn't correct")
     
-    user = search_user(form.username)
+    user = search_user_db(form.username)
 
     # check if passwd in the form coincides with my user
     if not form.password == user.password:
@@ -72,5 +88,5 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
     
 
 @app.get("/users/me")
-async def  me(user: User = Depends(current_user)):
+async def me(user: User = Depends(current_user)):
     return user
