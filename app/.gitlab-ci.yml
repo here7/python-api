@@ -1,10 +1,5 @@
 build-job:
-  stage: build
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!"
-
-deploy-prod:
-  stage: deploy
-  script:
-    - echo "This job deploys code from the $CI_COMMIT_BRANCH branch."
-  environment: production
+    - echo "This job runs in merge request pipelines"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
