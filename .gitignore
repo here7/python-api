@@ -2,5 +2,3 @@
 __pycache__/
 .DS_Store
 .env
-app/routers/basic_auth_users.py
-app/routers/jwt_auth_users.py
