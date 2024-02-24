@@ -1,10 +1,17 @@
 import datetime
+import os
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
+from openai import OpenAI
 
 router = APIRouter(prefix="/articles", 
                    tags=["articles"],
                    responses={status.HTTP_404_NOT_FOUND: {"message": "Not Found"}})
+
+# defaults to getting the key using os.environ.get("OPENAI_API_KEY")
+client_chatgpt = OpenAI(
+    api_key = os.environ.get("OPENAI_API_KEY")
+)
 
 class Article(BaseModel):
     id: int
@@ -39,7 +46,6 @@ async def article(topic: str):
 
 def create_article_chatgpt(topic: str):
     pass
-
 def search_article(id: int):
     article = filter(lambda article: article.id == id, articles_list)
     
