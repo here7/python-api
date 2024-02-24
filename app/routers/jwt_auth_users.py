@@ -1,12 +1,16 @@
+import os
 from fastapi import Depends, APIRouter, HTTPException, status
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
-SECRET_KEY = "3ec6dcb3460c3d9957dbd7aacf4de6b7dda6d8b690f9bf00265d6499c79a1ee2"
-ALGORITHM = "HS256"
+load_dotenv() # take environment variables from .env
+
+SECRET_KEY = os.environ.get("SECRET_KEY")
+ALGORITHM = os.environ.get("ALGORITHM")
 ACCESS_TOKEN_DURATION = 5
 
 router = APIRouter()
@@ -29,14 +33,14 @@ users_db = {
         "full_name": "Dani Heredia",
         "email": "dani@gmail.com",
         "disabled": False,
-        "password": "$2a$12$tk1Aa0hZXeVxOwfdHuFEEegTdPFILSCu8dtaad4j7RpLW589hYRiK" 
+        "password": os.environ.get("USER1_PWD") 
     },
     "dani_2": {
         "username": "dani_2",
         "full_name": "Dani Heredia 2",
         "email": "dani2@gmail.com",
         "disabled": True,
-        "password": "$2a$12$nnye8Yp32y/Du2C4fKlcb.gJs3q03KO91rgqFYJIMXx8d93XQJA7e" 
+        "password": os.environ.get("USER2_PWD") 
     }
 }
 
