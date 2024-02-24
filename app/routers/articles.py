@@ -1,17 +1,15 @@
-import datetime
 import os
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv() # take environment variables from .env
 
 router = APIRouter(prefix="/articles", 
                    tags=["articles"],
                    responses={status.HTTP_404_NOT_FOUND: {"message": "Not Found"}})
 
-# defaults to getting the key using os.environ.get("OPENAI_API_KEY")
-client_chatgpt = OpenAI(
-    api_key = os.environ.get("OPENAI_API_KEY")
-)
 
 class Article(BaseModel):
     id: int
@@ -39,13 +37,36 @@ async def article(topic: str):
     if not topic:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Topic wasn't defined properly")
 
-    article_chatgpt = Article()
-
     return create_article_chatgpt(topic)
 
 
 def create_article_chatgpt(topic: str):
-    pass
+    # Setting OpenAI
+    client = OpenAI(
+        # This is the default and can be omitted
+        api_key=os.environ.get("OPENAI_API_KEY"),
+    )
+
+    # Context for ChatGpt
+    messages = [{
+                "role": "system",
+                "content": "Please, I want you to write an article about the topic that the user will specify",
+            }]
+    
+    # Topic defined by the User
+    messages.append({
+                        "role": "user",
+                        "content": "Write an article about {topic}",
+                    })
+    try:
+        response = client.chat.completions.create(
+                messages,
+                model="gpt-3.5-turbo",
+            )
+        return response.choices[0].message.content
+    except:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="error: error connection to chatGPT API")
+
 def search_article(id: int):
     article = filter(lambda article: article.id == id, articles_list)
     
@@ -53,5 +74,3 @@ def search_article(id: int):
         return list(article)[0]
     except:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="error: Article doesn't exist")
-    
-
